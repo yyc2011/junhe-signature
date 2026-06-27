@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>项目详情 — 签字页系统</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; }
+    header {
+      background: #1a1a2e; color: #fff; padding: 0 32px;
+      display: flex; align-items: center; gap: 32px; height: 52px;
+    }
+    header h1 { font-size: 16px; font-weight: 600; margin-right: auto; }
+    header a { color: #ccc; text-decoration: none; font-size: 14px; }
+    header a:hover { color: #fff; }
+    .container { max-width: 960px; margin: 32px auto; padding: 0 16px; }
+    .card {
+      background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;
+      padding: 24px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 15px; font-weight: 600; margin-bottom: 16px;
+      padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; color: #333;
+    }
+    .info-grid { display: grid; grid-template-columns: 120px 1fr; gap: 8px 0; font-size: 14px; }
+    .info-grid .label { color: #888; padding: 4px 0; }
+    .info-grid .value { padding: 4px 0; }
+    .status-draft { color: #888; }
+    .status-filling { color: #d97706; font-weight: 600; }
+    .status-generated { color: #16a34a; font-weight: 600; }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 16px; border-radius: 4px; border: 1px solid #1a1a2e;
+      background: #1a1a2e; color: #fff; cursor: pointer; font-size: 14px;
+      text-decoration: none; display: inline-block;
+    }
+    .btn:hover:not(:disabled) { opacity: 0.85; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-outline {
+      background: #fff; color: #1a1a2e; border: 1px solid #1a1a2e;
+    }
+    .btn-outline:hover:not(:disabled) { background: #f0f0f0; }
+    .btn-sm {
+      padding: 5px 12px; font-size: 13px; border-radius: 4px;
+      border: 1px solid #1a1a2e; background: #fff; color: #1a1a2e;
+      cursor: pointer; display: inline-block;
+    }
+    .btn-sm:hover { background: #1a1a2e; color: #fff; }
+    .btn-danger {
+      border-color: #b00020; background: #b00020; color: #fff;
+    }
+
+    /* Template bind area */
+    .template-list { margin-bottom: 12px; }
+    .template-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; background: #f8f8f8; border-radius: 4px; margin-bottom: 6px;
+      font-size: 14px;
+    }
+    .template-item .tname { font-weight: 500; }
+    .template-item .tcount { color: #888; font-size: 13px; }
+    .var-summary { font-size: 14px; color: #555; margin-top: 8px; }
+
+    /* Bind panel */
+    #bindPanel { display: none; margin-top: 16px; border: 1px solid #e0e0e0; border-radius: 6px; padding: 16px; }
+    .checkbox-list { max-height: 240px; overflow-y: auto; margin-bottom: 12px; }
+    .checkbox-item { display: flex; align-items: center; gap: 8px; padding: 6px 4px; font-size: 14px; }
+    .checkbox-item input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; }
+    .bind-actions { display: flex; gap: 10px; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 0; margin-bottom: 0; border-bottom: 2px solid #e0e0e0; }
+    .tab-btn {
+      padding: 9px 20px; font-size: 14px; border: none; background: none;
+      cursor: pointer; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px;
+    }
+    .tab-btn.active { color: #1a1a2e; border-bottom-color: #1a1a2e; font-weight: 600; }
+    .tab-panel { display: none; padding-top: 20px; }
+    .tab-panel.active { display: block; }
+
+    /* Variable table */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 12px; text-align: left; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
+    th { background: #fafafa; font-weight: 600; color: #555; font-size: 13px; }
+    td input[type=text] {
+      width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px;
+      font-size: 14px; outline: none;
+    }
+    td input[type=text]:focus { border-color: #1a1a2e; }
+    td input[readonly] { background: #f5f5f5; color: #666; border-color: transparent; }
+    .table-actions { margin-top: 14px; }
+
+    /* Excel import */
+    .excel-section { display: flex; flex-direction: column; gap: 16px; }
+    .excel-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .excel-row label { font-size: 14px; color: #555; }
+    input[type=file] { font-size: 14px; }
+
+    /* Generated files */
+    .file-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; background: #f8f8f8; border-radius: 4px; margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .file-item .fname { font-weight: 500; }
+    .generate-actions { display: flex; gap: 10px; margin-top: 4px; }
+
+    /* Messages */
+    .msg-box {
+      padding: 10px 14px; border-radius: 4px; font-size: 14px; margin-bottom: 14px; display: none;
+    }
+    .msg-box.success { background: #e6f4ea; color: #1e7e34; border: 1px solid #b7dfbe; }
+    .msg-box.error { background: #fdecea; color: #b00020; border: 1px solid #f5c6cb; }
+    .msg-box.info { background: #e8f0fe; color: #1a56db; border: 1px solid #bfcffe; }
+
+    .section-hidden { display: none; }
+    .back-link { font-size: 13px; color: #888; text-decoration: none; margin-bottom: 16px; display: inline-block; }
+    .back-link:hover { color: #1a1a2e; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>签字页系统</h1>
+    <a href="../index.html">首页</a>
+    <a href="template_list.html">模板管理</a>
+    <a href="project_list.html">项目管理</a>
+  </header>
+  <div class="container">
+    <a href="project_list.html" class="back-link">← 返回项目列表</a>
+
+    <!-- 区块一：项目信息 -->
+    <div class="card" id="infoCard">
+      <div class="card-title">项目信息</div>
+      <div class="info-grid">
+        <span class="label">项目名称</span><span class="value" id="projName">—</span>
+        <span class="label">当前状态</span><span class="value" id="projStatus">—</span>
+        <span class="label">创建时间</span><span class="value" id="projCreatedAt">—</span>
+      </div>
+    </div>
+
+    <!-- 区块二：模板绑定 -->
+    <div class="card">
+      <div class="card-title">模板绑定</div>
+      <div id="bindMsg" class="msg-box"></div>
+      <div id="boundTemplates" class="template-list"></div>
+      <div id="varSummary" class="var-summary" style="display:none"></div>
+      <div style="margin-top:14px">
+        <button class="btn btn-outline" id="toggleBindBtn" onclick="toggleBindPanel()">重新绑定模板</button>
+      </div>
+      <div id="bindPanel">
+        <div style="font-size:13px;color:#555;margin-bottom:10px">选择要绑定的模板（可多选，绑定后将清空旧数据）：</div>
+        <div class="checkbox-list" id="templateCheckboxes">加载中...</div>
+        <div class="bind-actions">
+          <button class="btn" id="confirmBindBtn" onclick="confirmBind()">确认绑定</button>
+          <button class="btn btn-outline" onclick="toggleBindPanel()">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 区块三：变量填写 -->
+    <div class="card section-hidden" id="variableCard">
+      <div class="card-title">变量填写</div>
+      <div id="varMsg" class="msg-box"></div>
+      <div class="tabs">
+        <button class="tab-btn active" id="tab1Btn" onclick="switchTab('form')">页面填写</button>
+        <button class="tab-btn" id="tab2Btn" onclick="switchTab('excel')">Excel 导入</button>
+      </div>
+
+      <!-- 页面填写 Tab -->
+      <div class="tab-panel active" id="formTab">
+        <table id="varTable">
+          <thead>
+            <tr>
+              <th style="width:200px">变量名（key）</th>
+              <th style="width:220px">中文名（label）</th>
+              <th>填写值（value）</th>
+            </tr>
+          </thead>
+          <tbody id="varTableBody"></tbody>
+        </table>
+        <div class="table-actions">
+          <button class="btn" id="saveVarBtn" onclick="saveVariables()">保存变量</button>
+        </div>
+      </div>
+
+      <!-- Excel 导入 Tab -->
+      <div class="tab-panel" id="excelTab">
+        <div class="excel-section">
+          <div class="excel-row">
+            <span style="font-size:14px;color:#555">步骤 1：下载变量 Excel 模板，在表格中填写 label 和 value</span>
+            <button class="btn btn-outline" id="downloadExcelBtn" onclick="downloadExcel()">下载变量 Excel 模板</button>
+          </div>
+          <div class="excel-row">
+            <label for="excelFileInput">步骤 2：选择填写好的 Excel 文件</label>
+            <input type="file" id="excelFileInput" accept=".xlsx,.xls">
+            <button class="btn" id="uploadExcelBtn" onclick="uploadExcel()">上传并导入</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 区块四：生成与下载 -->
+    <div class="card section-hidden" id="generateCard">
+      <div class="card-title">生成与下载</div>
+      <div id="genMsg" class="msg-box"></div>
+      <div class="generate-actions">
+        <button class="btn" id="generateBtn" onclick="generateFiles()">生成签字页</button>
+        <button class="btn btn-outline" id="downloadAllBtn" onclick="downloadAll()" style="display:none">打包下载全部</button>
+      </div>
+      <div id="fileList" style="margin-top:16px"></div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/project_detail.js"></script>
+</body>
+</html>

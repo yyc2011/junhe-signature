@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>上传模板 — 签字页系统</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; }
+    header {
+      background: #1a1a2e; color: #fff; padding: 0 32px;
+      display: flex; align-items: center; gap: 32px; height: 52px;
+    }
+    header h1 { font-size: 16px; font-weight: 600; margin-right: auto; }
+    header a { color: #ccc; text-decoration: none; font-size: 14px; }
+    header a:hover { color: #fff; }
+    .container { max-width: 640px; margin: 40px auto; padding: 0 16px; }
+    .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 32px; }
+    h2 { font-size: 18px; margin-bottom: 24px; }
+    label { display: block; font-size: 14px; color: #555; margin-bottom: 6px; }
+    .upload-area {
+      border: 2px dashed #ccc; border-radius: 6px; padding: 40px;
+      text-align: center; cursor: pointer; transition: border-color 0.2s;
+    }
+    .upload-area:hover, .upload-area.dragover { border-color: #1a1a2e; }
+    .upload-area p { color: #888; font-size: 14px; margin-top: 8px; }
+    .upload-area input[type=file] { display: none; }
+    .file-name { margin-top: 12px; font-size: 14px; color: #333; }
+    .btn {
+      display: inline-block; margin-top: 24px; padding: 10px 28px;
+      border-radius: 4px; border: none; background: #1a1a2e; color: #fff;
+      cursor: pointer; font-size: 14px; width: 100%;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn:hover:not(:disabled) { opacity: 0.85; }
+    #msg { margin-top: 16px; padding: 10px 14px; border-radius: 4px; display: none; font-size: 14px; }
+    #msg.success { background: #e6f4ea; color: #1e7e34; border: 1px solid #b7dfbe; }
+    #msg.error { background: #fdecea; color: #b00020; border: 1px solid #f5c6cb; }
+    .hint { margin-top: 20px; font-size: 13px; color: #888; line-height: 1.7; }
+    .hint code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>签字页系统</h1>
+    <a href="../index.html">首页</a>
+    <a href="template_list.html">模板管理</a>
+    <a href="project_list.html">项目管理</a>
+  </header>
+  <div class="container">
+    <div class="card">
+      <h2>上传签字页模板</h2>
+      <label>选择 DOCX 文件（模板名称取文件名，同名自动覆盖）</label>
+      <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <svg width="40" height="40" fill="none" stroke="#ccc" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M12 16V4m0 0L8 8m4-4l4 4M4 20h16"/>
+        </svg>
+        <p>点击选择文件或拖拽到此处</p>
+        <p>仅支持 .docx 格式</p>
+        <input type="file" id="fileInput" accept=".docx">
+      </div>
+      <div class="file-name" id="fileName"></div>
+      <button class="btn" id="uploadBtn" onclick="upload()" disabled>上传并解析变量</button>
+      <div id="msg"></div>
+      <div class="hint">
+        <strong>模板变量格式说明：</strong><br>
+        在 DOCX 文件中，使用 <code>{{变量名}}</code> 作为占位符。<br>
+        变量名只允许英文字母、数字、下划线。<br>
+        例如：<code>{{law_firm_name}}</code>、<code>{{sign_year}}</code>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/template_upload.js"></script>
+</body>
+</html>

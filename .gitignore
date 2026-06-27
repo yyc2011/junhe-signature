@@ -1,0 +1,8 @@
+junhe/
+backend/junhe.db
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.DS_Store
